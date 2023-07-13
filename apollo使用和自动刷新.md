@@ -3,26 +3,67 @@
 
 ### 一、安装apollo
 #### (1)安装数据库和配置库表
-数据库用mysql,我在window平台，用的免安装板5.6的。创建数据库，用的官方提供的sql。
+数据库用mysql，我在window平台，用的免安装板5.6的。创建数据库，用的官方提供的sql。
 
 [安装apollo](https://www.apolloconfig.com/#/zh/deployment/quick-start)
 
 (mysql免安装链接：https://pan.baidu.com/s/1oQvYeYeMnsQ2etPXoZrPlA 提取码：vra9)
 
+官方教程：
+![Alt text](image-3.png)
 #### (2)启动apollo(需要JVM环境)
 ```
 demo.sh start 
 ```
 启动服务，启动之前需要设置下数据库账号、密码，数据库是上面已经创建好的。在git bash 启动服务后看到的日志，这个要等注册中心先启动，之后才会启动apollo服务和管理界面。
 
-* (3)启动自定义的项目
-界面：http://localhost:8070 
-账号：apollo/admin
+注意，启动需要一定的时间。启动完成可以看到日志：
+![Alt text](image.png)
 
+对应的服务分别有：
+
+* 注册中心：http://127.0.0.1:8080/
+
+![Alt text](image-1.png)
+
+* apollo-adminservice: http://127.0.0.1:8090/，这个是主服务，管理配置数据的。
+
+* 管理界面地址：http://localhost:8070，账号：apollo/admin
+
+![Alt text](image-2.png)
+#### (3)启动自定义的项目
+上面启动了服务端，创建一个简单的springboot项目，maven 配置：
+```xml
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-context</artifactId>
+    <version>2.2.0.RELEASE</version>
+</dependency>
+<!-- apollo -->
+<dependency>
+    <groupId>com.ctrip.framework.apollo</groupId>
+    <artifactId>apollo-client</artifactId>
+    <version>1.7.0</version>
+</dependency>
+```
+服务配置：
+```yml
+server:
+  port: 8123 # 修改端口，避免冲突
+
+app:
+  id: springboot-apollo
+apollo:
+  meta: http://127.0.0.1:8080
+  bootstrap:
+    enabled: true
+    eagerLoad:
+      enabled: true
+```
+这样就可以在springboot项目使用apollo了。
 ### 二、使用配置
-[动态刷新配置](http://www.javashuo.com/article/p-zhzewvam-mk.html)
 
-#### 1.连接apollo,读取配置
+#### 1.连接apollo，读取配置
 最简单的用法是使用注解@Value，普通的spring配置
 ```java
 @Value("${xxx}")
@@ -49,7 +90,7 @@ AppConfig
 * 索引+字段        
     user.maps.first = 张飞
     user.maps.second = 李四
-    user.collects = {1:张三,2:李四}
+    user.collects = {1:张三，2:李四}
 
 #### 5.demo  
 配置项如下：
@@ -77,7 +118,7 @@ public class AppConfig {
     private String name;
     private Integer id;
     private List<User> list;
-    private Map<String,String> maps;
+    private Map<String，String> maps;
 }
 ```
 
@@ -90,7 +131,7 @@ public class AppConfig {
 ```java
 org.springframework.cloud.context.config.annotation.RefreshScope
 监听器:
-ApolloConfigChangeListener,可以指定命名空间和前缀
+ApolloConfigChangeListener，可以指定命名空间和前缀
 刷新属性:
 refreshScope.refresh("refreshConfig");
 ```    
@@ -137,7 +178,7 @@ public class UserPropertiesRefresh implements ApplicationContextAware {
     @ApolloConfigChangeListener(interestedKeyPrefixes = {"user."})
     private void refresh(ConfigChangeEvent changeEvent){
         applicationContext.publishEvent(new EnvironmentChangeEvent(changeEvent.changedKeys()));
-        log.info("change key: {}",changeEvent.changedKeys());
+        log.info("change key: {}"，changeEvent.changedKeys());
     }
 
     @Override
@@ -146,7 +187,7 @@ public class UserPropertiesRefresh implements ApplicationContextAware {
     }
 }
 ```
-
+参考：[动态刷新配置](http://www.javashuo.com/article/p-zhzewvam-mk.html)
 ### 多环境管理
 dev\qas\uat\prd
 
@@ -156,4 +197,4 @@ dev\qas\uat\prd
 轮询数据
 ## 总结
 
-文章主要介绍了配置中心apollo的安装和使用，已经应用端监听刷新的配置方式。
+文章主要介绍了配置中心apollo的安装和使用，以及应用端监听刷新的配置方式。
