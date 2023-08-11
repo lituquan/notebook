@@ -1,6 +1,7 @@
 ## 背景
 配置中心作为系统中常用子系统，其功能一个是统一管理配置，其次是适应更新。目前流行的配置中心有apollo，spring config，Nacos等，这里主要说下apollo。
 
+## 使用
 ### 一、安装apollo
 #### (1)安装数据库和配置库表
 数据库用mysql，我在window平台，用的免安装板5.6的。创建数据库，用的官方提供的sql。
@@ -189,12 +190,16 @@ public class UserPropertiesRefresh implements ApplicationContextAware {
 ```
 参考：[动态刷新配置](http://www.javashuo.com/article/p-zhzewvam-mk.html)
 ### 多环境管理
-dev\qas\uat\prd
-
-同步数据
+#### 使用namespace
+这个的隔离级别并不友好
+* [namespace](https://www.jianshu.com/p/6c9a7b78f20d)
+  
+#### 多节点
+* [Apollo多环境部署](https://www.cnblogs.com/louwj/p/16017984.html)
+#### 回滚
+有个坑：apollo的回滚有问题，建议手动修改。看了官方的issue，好像是设计就是这样的，和使用习惯不同导致。未发布的是可以回滚的，已发布的会作为最新的发布点，是回滚不了的。
+[1.2 版本回滚bug](https://github.com/apolloconfig/apollo/issues/1912)
 
 ### 刷新机制
-轮询数据
-## 总结
-
-文章主要介绍了配置中心apollo的安装和使用，以及应用端监听刷新的配置方式。
+http长轮询数据，不维护长连接
+[认识长轮询：配置中心是如何实现推送的？](https://zhuanlan.zhihu.com/p/351196920)
