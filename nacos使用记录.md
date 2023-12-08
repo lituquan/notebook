@@ -39,3 +39,10 @@ http://127.0.0.1:8848/nacos
 
 ## 配置中心
 
+有一个坑：springcloud 启动文件使用bootstrap.yml 而不是 applocation.yml里的nacos配置。
+
+### 配置刷新
+@RefreshScope
+
+
+
